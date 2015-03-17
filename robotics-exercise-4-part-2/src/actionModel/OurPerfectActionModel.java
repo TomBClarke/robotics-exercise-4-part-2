@@ -33,8 +33,8 @@ public class OurPerfectActionModel implements ActionModel {
 		GridPositionDistribution to = new GridPositionDistribution(_from);
 
 		// Move the probability in the correct direction for the action
-		move(_from, to, _heading);
-
+		shiftProbabilities(_from, to, _heading);
+		scaleProbabilities(to);
 		return to;
 	}
 
@@ -44,9 +44,9 @@ public class OurPerfectActionModel implements ActionModel {
 	 * @param _from
 	 * @param _to
 	 */
-	private void move(GridPositionDistribution _from,
+	private void shiftProbabilities(GridPositionDistribution _from,
 			GridPositionDistribution _to, Heading heading) {
-
+		
 		// iterate through points updating as appropriate
 		for (int y = 0; y < _to.getGridHeight(); y++) {
 
@@ -100,4 +100,18 @@ public class OurPerfectActionModel implements ActionModel {
 			}
 		}
 	}
+	
+	private void scaleProbabilities(GridPositionDistribution _to){
+		float a = 1/(_to.sumProbabilities());
+		for (int y = 0; y < _to.getGridHeight(); y++) {
+			for (int x = 0; x < _to.getGridWidth(); x++) {
+				float prob = a*_to.getProbability(x, y);
+				_to.setProbability(x, y, prob);
+			}
+		}
+	}
+	
+	
+	
+	
 }
