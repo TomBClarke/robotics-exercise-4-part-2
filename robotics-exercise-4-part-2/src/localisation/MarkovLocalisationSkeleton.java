@@ -1,4 +1,4 @@
-package actionModel;
+package localisation;
 
 import gridMap.GridMap;
 
@@ -38,7 +38,7 @@ public class MarkovLocalisationSkeleton {
 	// Visualisation
 	private GridPositionDistributionVisualisation m_mapVis;
 	private final float m_translationAmount;
-	
+
 	private final int moveDelayTime;
 
 	public MarkovLocalisationSkeleton(SimulatedRobot _robot, LineMap _lineMap,
@@ -112,7 +112,7 @@ public class MarkovLocalisationSkeleton {
 	public void run() {
 
 		ActionModel actionModel = new OurPerfectActionModel(m_gridMap);
-		SensorModel sensorModel = new PerfectSensorModel();
+		SensorModel sensorModel = new OurPerfectSensorModel(m_gridMap);
 
 		int horizontal = 3;
 		int vertical = 1;
@@ -177,21 +177,21 @@ public class MarkovLocalisationSkeleton {
 	public static void main(String[] args) {
 
 		// Work on this map
-		RPLineMap lineMap = MapUtils.create2014Map2();
+		RPLineMap lineMap = MapUtils.create2015Map1();
 
 		// Grid map configuration
 
-		// Grid junction numbers
-		int xJunctions = 10;
-		int yJunctions = 7;
-
+		// grid map dimensions for this line map
+		int xJunctions = 14;
+		int yJunctions = 8;
 		float junctionSeparation = 30;
 
-		int xInset = 14;
-		int yInset = 31;
+		// position of grid map 0,0
+		int xInset = 15;
+		int yInset = 15;
 
-		IGridMap gridMap = new GridMap(xJunctions,
-				yJunctions, xInset, yInset, junctionSeparation, lineMap);
+		IGridMap gridMap = new GridMap(xJunctions, yJunctions, xInset, yInset,
+				junctionSeparation, lineMap);
 
 		// the starting position of the robot for the simulation. This is not
 		// known in the action model or position distribution
