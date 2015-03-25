@@ -7,6 +7,8 @@ import javax.swing.JFrame;
 import lejos.geom.Point;
 import lejos.robotics.mapping.LineMap;
 import lejos.robotics.navigation.Pose;
+import lejos.robotics.subsumption.Arbitrator;
+import lejos.robotics.subsumption.Behavior;
 import lejos.util.Delay;
 import rp.robotics.localisation.ActionModel;
 import rp.robotics.localisation.GridPositionDistribution;
@@ -39,7 +41,6 @@ public class MarkovLocalisationSkeleton {
 	private GridPositionDistributionVisualisation m_mapVis;
 	private final float m_translationAmount;
 
-	private final int moveDelayTime;
 
 	public MarkovLocalisationSkeleton(SimulatedRobot _robot, LineMap _lineMap,
 			IGridMap _gridMap, float _translationAmount) {
@@ -49,7 +50,6 @@ public class MarkovLocalisationSkeleton {
 		m_gridMap = _gridMap;
 		m_distribution = new GridPositionDistribution(m_gridMap);
 		m_translationAmount = _translationAmount;
-		moveDelayTime = 1000;
 	}
 
 	/**
@@ -81,94 +81,20 @@ public class MarkovLocalisationSkeleton {
 	 * @param _heading
 	 * @param _sensorModel
 	 */
-	private void move(float distance, Heading _heading,
-			ActionModel _actionModel, SensorModel _sensorModel) {
-		// move robot
-		m_robot.translate(m_translationAmount);
-
-		// now update estimate of position using the action model
-		m_distribution = _actionModel.updateAfterMove(m_distribution, _heading);
-
-		// if visualising, update the shown distribution
-		if (m_mapVis != null) {
-			m_mapVis.setDistribution(m_distribution);
-		}
-
-		// A short delay so we can see what's going on
-		Delay.msDelay(moveDelayTime);
-
-		m_distribution = _sensorModel.updateAfterSensing(m_distribution,
-				_heading, m_robot.getRangeValues());
-
-		// if visualising, update the shown distribution
-		if (m_mapVis != null) {
-			m_mapVis.setDistribution(m_distribution);
-		}
-
-		// A short delay so we can see what's going on
-		Delay.msDelay(moveDelayTime);
-	}
 
 	public void run() {
 
 		ActionModel actionModel = new OurPerfectActionModel(m_gridMap);
-		SensorModel sensorModel = new OurPerfectSensorModel(m_gridMap);
-
-		int horizontal = 3;
-		int vertical = 1;
+		SensorModel sensorModel = new OurSensorModel(m_gridMap);
 
 		// Assuming all the moves go in this direction. This will not work once
 		// the robot turns...
-		Heading movementHeading;
-		int moves;
 
-		while (true) {
-
-			movementHeading = Heading.PLUS_X;
-			moves = horizontal;
-			for (int i = 0; i < moves; i++) {
-
-				// For the simulated robot I am simply moving it a preset
-				// distance
-				// to make it look as it if it successfully moved to the next
-				// grid
-				// position. For your code you should not use translation on the
-				// continuous map, but instead use the something that abstracts
-				// the
-				// grid movement.
-
-				move(m_translationAmount, movementHeading, actionModel,
-						sensorModel);
-			}
-
-			m_robot.rotate(90);
-			movementHeading = Heading.PLUS_Y;
-			moves = vertical;
-			for (int i = 0; i < moves; i++) {
-				move(m_translationAmount, movementHeading, actionModel,
-						sensorModel);
-			}
-
-			m_robot.rotate(90);
-			movementHeading = Heading.MINUS_X;
-			moves = horizontal;
-			for (int i = 0; i < moves; i++) {
-				move(m_translationAmount, movementHeading, actionModel,
-						sensorModel);
-			}
-
-			m_robot.rotate(90);
-			movementHeading = Heading.MINUS_Y;
-			moves = vertical;
-			for (int i = 0; i < moves; i++) {
-				move(m_translationAmount, movementHeading, actionModel,
-						sensorModel);
-			}
-
-			m_robot.rotate(90);
-
-		}
-
+		TurnBehaviour turning = new TurnBehaviour(m_robot);
+		MoveForwardBehaviour forwards = new MoveForwardBehaviour(m_robot,turning,m_translationAmount,actionModel,sensorModel,m_distribution,m_mapVis);
+		Arbitrator arby = new Arbitrator(new Behavior[] {turning,forwards});
+		
+		arby.start();
 	}
 
 	/**
@@ -211,7 +137,7 @@ public class MarkovLocalisationSkeleton {
 		// This creates a simulated robot with single, forward pointing distance
 		// sensor with similar properties to the Lego ultrasonic sensor but
 		// without the noise
-		SimulatedRobot robot = SimulatedRobot.createSingleNoiseFreeSensorRobot(
+		SimulatedRobot robot = SimulatedRobot.createSingleSensorRobot(
 				startPose, lineMap);
 
 		// This does the same as above but adds noise to the range readings
