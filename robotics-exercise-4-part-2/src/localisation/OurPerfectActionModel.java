@@ -105,8 +105,10 @@ public class OurPerfectActionModel implements ActionModel {
 		float a = 1/(_to.sumProbabilities());
 		for (int y = 0; y < _to.getGridHeight(); y++) {
 			for (int x = 0; x < _to.getGridWidth(); x++) {
-				float prob = a*_to.getProbability(x, y);
-				_to.setProbability(x, y, prob);
+				if (!_to.isObstructed(x, y)) {
+					float prob = a*_to.getProbability(x, y);
+					_to.setProbability(x, y, prob);
+				}
 			}
 		}
 	}

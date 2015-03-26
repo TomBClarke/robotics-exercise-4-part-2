@@ -9,18 +9,14 @@ import lejos.robotics.mapping.LineMap;
 import lejos.robotics.navigation.Pose;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
-import lejos.util.Delay;
 import rp.robotics.localisation.ActionModel;
 import rp.robotics.localisation.GridPositionDistribution;
-import rp.robotics.localisation.PerfectActionModel;
-import rp.robotics.localisation.PerfectSensorModel;
 import rp.robotics.localisation.SensorModel;
 import rp.robotics.mapping.Heading;
 import rp.robotics.mapping.IGridMap;
 import rp.robotics.mapping.MapUtils;
 import rp.robotics.mapping.RPLineMap;
 import rp.robotics.simulation.SimulatedRobot;
-import rp.robotics.visualisation.GridMapViewer;
 import rp.robotics.visualisation.GridPositionDistributionVisualisation;
 import rp.robotics.visualisation.KillMeNow;
 
