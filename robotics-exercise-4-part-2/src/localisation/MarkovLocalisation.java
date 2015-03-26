@@ -20,7 +20,11 @@ import rp.robotics.simulation.SimulatedRobot;
 import rp.robotics.visualisation.GridPositionDistributionVisualisation;
 import rp.robotics.visualisation.KillMeNow;
 
-public class MarkovLocalisationSkeleton {
+/**
+ * @author Rowan Cole
+ * Main class for localisation
+ */
+public class MarkovLocalisation {
 
 	// Maps
 	private final LineMap m_lineMap;
@@ -38,7 +42,7 @@ public class MarkovLocalisationSkeleton {
 	private final float m_translationAmount;
 
 
-	public MarkovLocalisationSkeleton(SimulatedRobot _robot, LineMap _lineMap,
+	public MarkovLocalisation(SimulatedRobot _robot, LineMap _lineMap,
 			IGridMap _gridMap, float _translationAmount) {
 
 		m_robot = _robot;
@@ -78,10 +82,9 @@ public class MarkovLocalisationSkeleton {
 	 * @param _sensorModel
 	 */
 
-	public void run() {
+	public void run(SimulatedRobot m_robot, SensorModel sensorModel) {
 
 		ActionModel actionModel = new OurPerfectActionModel(m_gridMap);
-		SensorModel sensorModel = new OurSensorModel(m_gridMap);
 
 		// Assuming all the moves go in this direction. This will not work once
 		// the robot turns...
@@ -93,6 +96,9 @@ public class MarkovLocalisationSkeleton {
 		arby.start();
 	}
 
+	/**
+	 * @param args
+	 */
 	/**
 	 * @param args
 	 */
@@ -135,15 +141,23 @@ public class MarkovLocalisationSkeleton {
 		// without the noise
 		SimulatedRobot robot = SimulatedRobot.createSingleSensorRobot(
 				startPose, lineMap);
-
+		SimulatedRobot perfectRobot = SimulatedRobot.createSingleNoiseFreeSensorRobot(
+				startPose, lineMap);
 		// This does the same as above but adds noise to the range readings
 		// SimulatedRobot robot = SimulatedRobot.createSingleSensorRobot(
 		// startPose, lineMap);
 
-		MarkovLocalisationSkeleton ml = new MarkovLocalisationSkeleton(robot,
+		//MarkovLocalisationSkeleton ml = new MarkovLocalisationSkeleton(robot,
+		//		lineMap, gridMap, junctionSeparation);
+		MarkovLocalisation ml = new MarkovLocalisation(perfectRobot,
 				lineMap, gridMap, junctionSeparation);
+		
+		SensorModel perfectSensorModel = new OurPerfectSensorModel(gridMap);
+		SensorModel sensorModel = new OurSensorModel(gridMap);
+		
+		
 		ml.visualise();
-		ml.run();
-
+		ml.run(perfectRobot,perfectSensorModel);
+		ml.run(robot,sensorModel);
 	}
 }

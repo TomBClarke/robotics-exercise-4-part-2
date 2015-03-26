@@ -1,7 +1,5 @@
 package localisation;
 
-import gridMap.GridMap;
-import lejos.geom.Point;
 import lejos.robotics.RangeReadings;
 import rp.robotics.localisation.GridPositionDistribution;
 import rp.robotics.localisation.SensorModel;
@@ -55,10 +53,13 @@ public class OurPerfectSensorModel implements SensorModel {
 		float a = 1/(_to.sumProbabilities());
 		for (int y = 0; y < _to.getGridHeight(); y++) {
 			for (int x = 0; x < _to.getGridWidth(); x++) {
-				float prob = a*_to.getProbability(x, y);
-				_to.setProbability(x, y, prob);
+				if (!_to.isObstructed(x, y)) {
+					float prob = a*_to.getProbability(x, y);
+					_to.setProbability(x, y, prob);
+				}
 			}
 		}
 	}
+	
 
 }
