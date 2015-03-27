@@ -7,22 +7,17 @@ import rp.robotics.mapping.Heading;
 import rp.robotics.mapping.IGridMap;
 
 /**
- * Empty sensor model for testing.
- * 
- * @author Nick Hawes
- *
+ * Perfect sensor model that cancels out any probabilities that do no exactly match range reading.
+ * @author Rowan Cole
  */
 public class OurPerfectSensorModel implements SensorModel {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see rp.robotics.localisation.SensorModel#updateAfterSensing(rp.robotics.
-	 * localisation.GridPositionDistribution, rp.robotics.mapping.Heading,
-	 * lejos.robotics.RangeReadings)
-	 */
 	private IGridMap gridMap;
 	
+	/**
+	 * Creates perfect sensor map from gridMap given
+	 * @param gridMap
+	 */
 	public OurPerfectSensorModel(IGridMap gridMap){
 		this.gridMap=gridMap;
 	}
@@ -33,11 +28,9 @@ public class OurPerfectSensorModel implements SensorModel {
 			RangeReadings _readings) {
 		GridPositionDistribution newDist = new GridPositionDistribution(_dist);
 		if(_readings.getRange(0)<255){
-			System.out.println(_readings.getRange(0)+"------------------");
 			for (int y = 0; y < newDist.getGridHeight(); y++) {
 				for (int x = 0; x < newDist.getGridWidth(); x++) {
 					float actualRange = gridMap.rangeToObstacleFromGridPosition(x,y, Heading.toDegrees(_heading));
-					System.out.println(actualRange);
 					if(actualRange!=_readings.getRange(0)){
 						newDist.setProbability(x, y, 0.0f);
 					}
@@ -49,6 +42,10 @@ public class OurPerfectSensorModel implements SensorModel {
 	
 	}
 
+	/**
+	 * Method to normalise the probabilities so that they all add up to 1
+	 * @param _to The distribution to be normalised
+	 */
 	private void scaleProbabilities(GridPositionDistribution _to){
 		float a = 1/(_to.sumProbabilities());
 		for (int y = 0; y < _to.getGridHeight(); y++) {

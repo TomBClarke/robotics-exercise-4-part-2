@@ -6,24 +6,21 @@ import rp.robotics.mapping.Heading;
 import rp.robotics.mapping.IGridMap;
 
 /**
- * Example structure for an action model that should move the probabilities 1
- * cell in the requested direction. In the case where the move would take the
- * robot into an obstacle or off the map, this model assumes the robot stayed in
- * one place. This is the same as the model presented in Robot Programming
- * lecture on action models.
- * 
- * Note that this class doesn't actually do this, instead it shows you a
- * <b>possible</b> structure for your action model.
- * 
- * @author Nick Hawes
- * 
+ * A perfect action mode implementing the ActionModel interface.
+ * @author Rowan Cole
+ *
  */
 public class OurPerfectActionModel implements ActionModel {
 	private IGridMap gridMap;
 	
+	/**
+	 * Constructor for the perfect action model.
+	 * @param gridMap The grid map to be use to check transitions against
+	 */
 	public OurPerfectActionModel(IGridMap gridMap){
 		this.gridMap=gridMap;
 	}
+	
 	@Override
 	public GridPositionDistribution updateAfterMove(
 			GridPositionDistribution _from, Heading _heading) {
@@ -40,35 +37,16 @@ public class OurPerfectActionModel implements ActionModel {
 
 	/**
 	 * Move probabilities from _from one cell in the plus x direction into _to
-	 * 
-	 * @param _from
-	 * @param _to
+	 * @param _from The original distribution
+	 * @param _to The next distribution
+	 * @param heading The direction of the move
 	 */
 	private void shiftProbabilities(GridPositionDistribution _from,
 			GridPositionDistribution _to, Heading heading) {
 		
-		// iterate through points updating as appropriate
 		for (int y = 0; y < _to.getGridHeight(); y++) {
-
 			for (int x = 0; x < _to.getGridWidth(); x++) {
-
-				// make sure to respect obstructed grid points
 				if (!_to.isObstructed(x, y)) {
-
-					// the action model should work out all of the different
-					// ways (x,y) in the _to grid could've been reached based on
-					// the _from grid and the move taken (in this case
-					// HEADING.PLUS_X)
-
-					// for example if the only way to have got to _to (x,y) was
-					// from _from (x-1, y) (i.e. there was a PLUS_X move from
-					// (x-1, y) then you write the value from _from (x-1, y) to
-					// the _to (x, y) value
-
-					// The below code does not translate the value, just copies
-					// it to the same position
-
-					// position before move
 					int fromX;
 					int fromY;
 					if(heading == Heading.PLUS_X){
@@ -101,6 +79,10 @@ public class OurPerfectActionModel implements ActionModel {
 		}
 	}
 	
+	/**
+	 * Method to normalise the probabilities so that they all add up to 1
+	 * @param _to The distribution to be normalised
+	 */
 	private void scaleProbabilities(GridPositionDistribution _to){
 		float a = 1/(_to.sumProbabilities());
 		for (int y = 0; y < _to.getGridHeight(); y++) {
@@ -111,6 +93,7 @@ public class OurPerfectActionModel implements ActionModel {
 				}
 			}
 		}
+		System.out.println(_to.sumProbabilities());
 	}
 	
 	

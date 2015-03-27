@@ -9,29 +9,34 @@ import org.testng.annotations.Test;
 
 import rp.robotics.localisation.ActionModel;
 import rp.robotics.localisation.GridPositionDistribution;
-import rp.robotics.localisation.PerfectSensorModel;
-import rp.robotics.localisation.SensorModel;
 import rp.robotics.mapping.Heading;
 import rp.robotics.mapping.IGridMap;
 import rp.robotics.mapping.MapUtils;
 import rp.robotics.mapping.RPLineMap;
 import rp.robotics.simulation.SimulatedRobot;
 
+/**
+ * TestNG class for testing the perfect action model.
+ * @author Rowan Cole
+ */
 public class OurPerfectActionModelTest {
-	// Maps
+	
 	private RPLineMap m_lineMap;
 	private IGridMap m_gridMap;
 
-	// Probability distribution over the position of a robot on the given
-	// grid map
 	private GridPositionDistribution m_distribution;
 
-	// Robot to drive around
 	private SimulatedRobot m_robot;
 	private float m_translationAmount;
 	
+	/**
+	 * Translates the robot by 1 in the given heading and updates the action model.
+	 * @param distance The distance to move (cell size)
+	 * @param _heading The direction to be moved in
+	 * @param _actionModel The action model to be updated
+	 */
 	private void move(float distance, Heading _heading,
-			ActionModel _actionModel, SensorModel _sensorModel) {
+			ActionModel _actionModel) {
 		m_robot.translate(m_translationAmount);
 		m_distribution = _actionModel.updateAfterMove(m_distribution, _heading);
 	}
@@ -41,8 +46,6 @@ public class OurPerfectActionModelTest {
 		setup();
 		
 		ActionModel actionModel = new OurPerfectActionModel(m_gridMap);
-		SensorModel sensorModel = new PerfectSensorModel();
-
 		
 		int currentX = 2;
 		int currentY = 1;
@@ -51,8 +54,6 @@ public class OurPerfectActionModelTest {
 		int horizontal = 3;
 		int vertical = 1;
 
-		// Assuming all the moves go in this direction. This will not work once
-		// the robot turns...
 		Heading movementHeading;
 		int moves;
 
@@ -60,8 +61,7 @@ public class OurPerfectActionModelTest {
 		moves = horizontal;
 		
 		for (int i = 0; i < moves; i++) {
-			move(m_translationAmount, movementHeading, actionModel,
-					sensorModel);
+			move(m_translationAmount, movementHeading, actionModel);
 			currentX++;
 			Assert.assertTrue(m_distribution.getProbability(currentX, currentY)>=lastProb);
 			lastProb=m_distribution.getProbability(currentX, currentY);
@@ -71,8 +71,7 @@ public class OurPerfectActionModelTest {
 		movementHeading = Heading.PLUS_Y;
 		moves = vertical;
 		for (int i = 0; i < moves; i++) {
-			move(m_translationAmount, movementHeading, actionModel,
-					sensorModel);
+			move(m_translationAmount, movementHeading, actionModel);
 			currentY++;
 			System.out.println(m_distribution.getProbability(currentX, currentY)+">="+lastProb);
 			Assert.assertTrue(m_distribution.getProbability(currentX, currentY)>=lastProb);
@@ -83,8 +82,7 @@ public class OurPerfectActionModelTest {
 		movementHeading = Heading.MINUS_X;
 		moves = horizontal;
 		for (int i = 0; i < moves; i++) {
-			move(m_translationAmount, movementHeading, actionModel,
-					sensorModel);
+			move(m_translationAmount, movementHeading, actionModel);
 			currentX--;
 			Assert.assertTrue(m_distribution.getProbability(currentX, currentY)>=lastProb);
 			lastProb=m_distribution.getProbability(currentX, currentY);
@@ -94,8 +92,7 @@ public class OurPerfectActionModelTest {
 		movementHeading = Heading.MINUS_Y;
 		moves = vertical;
 		for (int i = 0; i < moves; i++) {
-			move(m_translationAmount, movementHeading, actionModel,
-					sensorModel);
+			move(m_translationAmount, movementHeading, actionModel);
 			currentY--;
 			Assert.assertTrue(m_distribution.getProbability(currentX, currentY)>=lastProb);
 			lastProb=m_distribution.getProbability(currentX, currentY);
@@ -106,24 +103,26 @@ public class OurPerfectActionModelTest {
 
 	}
 	
+	/**
+	 * Creates the grid map and robot to be used.
+	 */
 	public void setup() {
 
-		// Work on this map
-		m_lineMap = MapUtils.create2014Map2();
+		RPLineMap lineMap = MapUtils.create2015Map1();
 
 		// Grid map configuration
 
-		// Grid junction numbers
-		int xJunctions = 10;
-		int yJunctions = 7;
+		// grid map dimensions for this line map
+		int xJunctions = 14;
+		int yJunctions = 8;
+		float junctionSeparation = 30;
 
-		m_translationAmount = 30;
-
-		int xInset = 14;
-		int yInset = 31;
+		// position of grid map 0,0
+		int xInset = 15;
+		int yInset = 15;
 
 		m_gridMap = new GridMap(xJunctions, yJunctions, xInset, yInset,
-				m_translationAmount, m_lineMap);
+				junctionSeparation, lineMap);
 
 		// the starting position of the robot for the simulation. This is not
 		// known in the action model or position distribution
@@ -146,9 +145,6 @@ public class OurPerfectActionModelTest {
 		m_robot = SimulatedRobot.createSingleNoiseFreeSensorRobot(
 				startPose, m_lineMap);
 
-		// This does the same as above but adds noise to the range readings
-		// SimulatedRobot robot = SimulatedRobot.createSingleSensorRobot(
-		// startPose, lineMap);
 		
 		m_distribution = new GridPositionDistribution(m_gridMap);
 	}

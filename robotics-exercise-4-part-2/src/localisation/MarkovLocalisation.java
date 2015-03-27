@@ -41,7 +41,13 @@ public class MarkovLocalisation {
 	private GridPositionDistributionVisualisation m_mapVis;
 	private final float m_translationAmount;
 
-
+	/**
+	 * Constructor method for MarkovLocalisation
+	 * @param _robot The simulated robot to be run
+	 * @param _lineMap The line map for the robot to be run on
+	 * @param _gridMap The grid map constructed from the line map
+	 * @param _translationAmount The distance between junctions
+	 */
 	public MarkovLocalisation(SimulatedRobot _robot, LineMap _lineMap,
 			IGridMap _gridMap, float _translationAmount) {
 
@@ -74,12 +80,10 @@ public class MarkovLocalisation {
 		frame.setVisible(true);
 	}
 
-	/***
-	 * Move the robot and update the distribution with the action model
-	 * 
-	 * @param distance
-	 * @param _heading
-	 * @param _sensorModel
+	/**
+	 * Start the arbitrator for the movement behaviours
+	 * @param m_robot The simulated robot that is to be run.
+	 * @param _sensorModel The sensor model object that is to be used to update the distribution.
 	 */
 
 	public void run(SimulatedRobot m_robot, SensorModel sensorModel) {
@@ -96,12 +100,6 @@ public class MarkovLocalisation {
 		arby.start();
 	}
 
-	/**
-	 * @param args
-	 */
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 
 		// Work on this map
@@ -136,9 +134,6 @@ public class MarkovLocalisation {
 
 		Pose startPose = new Pose(startPoint.x, startPoint.y, startTheta);
 
-		// This creates a simulated robot with single, forward pointing distance
-		// sensor with similar properties to the Lego ultrasonic sensor but
-		// without the noise
 		SimulatedRobot robot = SimulatedRobot.createSingleSensorRobot(
 				startPose, lineMap);
 		SimulatedRobot perfectRobot = SimulatedRobot.createSingleNoiseFreeSensorRobot(
