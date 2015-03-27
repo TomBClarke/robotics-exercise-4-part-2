@@ -11,6 +11,7 @@ import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import rp.robotics.localisation.ActionModel;
 import rp.robotics.localisation.GridPositionDistribution;
+import rp.robotics.localisation.PerfectSensorModel;
 import rp.robotics.localisation.SensorModel;
 import rp.robotics.mapping.Heading;
 import rp.robotics.mapping.IGridMap;
@@ -25,6 +26,13 @@ import rp.robotics.visualisation.KillMeNow;
  * Main class for localisation
  */
 public class MarkovLocalisation {
+	
+	private static int type = 3;
+	// Change above value to see:
+	// 0 - perfect/perfect
+	// 1 - imperfect robot / perfect sensor
+	// 2 - imperfect/imperfect
+	// 3 - action mode only
 
 	// Maps
 	private final LineMap m_lineMap;
@@ -138,21 +146,31 @@ public class MarkovLocalisation {
 				startPose, lineMap);
 		SimulatedRobot perfectRobot = SimulatedRobot.createSingleNoiseFreeSensorRobot(
 				startPose, lineMap);
-		// This does the same as above but adds noise to the range readings
-		// SimulatedRobot robot = SimulatedRobot.createSingleSensorRobot(
-		// startPose, lineMap);
 
-		//MarkovLocalisationSkeleton ml = new MarkovLocalisationSkeleton(robot,
-		//		lineMap, gridMap, junctionSeparation);
-		MarkovLocalisation ml = new MarkovLocalisation(perfectRobot,
-				lineMap, gridMap, junctionSeparation);
-		
 		SensorModel perfectSensorModel = new OurPerfectSensorModel(gridMap);
 		SensorModel sensorModel = new OurSensorModel(gridMap);
+		SensorModel emptySensorModel = new PerfectSensorModel();
 		
-		
-		ml.visualise();
-		ml.run(perfectRobot,perfectSensorModel);
-		ml.run(robot,sensorModel);
+		if(type == 0) {
+			MarkovLocalisation ml = new MarkovLocalisation(perfectRobot,
+					lineMap, gridMap, junctionSeparation);
+			ml.visualise();
+			ml.run(perfectRobot,perfectSensorModel);
+		} else if (type == 1) {
+			MarkovLocalisation ml = new MarkovLocalisation(robot,
+					lineMap, gridMap, junctionSeparation);
+			ml.visualise();	
+			ml.run(robot,perfectSensorModel);
+		} else if (type == 2) {
+			MarkovLocalisation ml = new MarkovLocalisation(robot,
+					lineMap, gridMap, junctionSeparation);
+			ml.visualise();
+			ml.run(robot,sensorModel);
+		} else {
+			MarkovLocalisation ml = new MarkovLocalisation(robot,
+					lineMap, gridMap, junctionSeparation);
+			ml.visualise();
+			ml.run(perfectRobot, emptySensorModel);
+		}
 	}
 }
